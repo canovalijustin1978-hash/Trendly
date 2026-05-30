@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Trendly — Where Your World Goes Viral</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --mint: #00F5C8;
+    --mint-dim: #00F5C822;
+    --black: #000000;
+    --surface: #0D0D0D;
+    --card: #111111;
+    --gray: #888;
+    --light: #F2F2F2;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--black);
+    color: var(--light);
+    font-family: 'Montserrat', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed; width: 12px; height: 12px;
+    background: var(--mint); border-radius: 50%;
+    pointer-events: none; z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s, width 0.2s, height 0.2s;
+    mix-blend-mode: difference;
+  }
+  .cursor-ring {
+    position: fixed; width: 36px; height: 36px;
+    border: 1.5px solid var(--mint); border-radius: 50%;
+    pointer-events: none; z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.15s ease, width 0.3s, height 0.3s, opacity 0.3s;
+    opacity: 0.5;
+  }
+
+  /* Noise overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0; opacity: 0.3;
+  }
+
+  /* Glow orbs */
+  .orb {
+    position: fixed; border-radius: 50%;
+    filter: blur(120px); pointer-events: none; z-index: 0;
+  }
+  .orb-1 { width: 500px; height: 500px; background: #00F5C818; top: -100px; right: -100px; }
+  .orb-2 { width: 400px; height: 400px; background: #00F5C810; bottom: 20%; left: -150px; }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 48px;
+    background: linear-gradient(to bottom, #000000ee, transparent);
+    backdrop-filter: blur(8px);
+  }
+  .nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--mint); letter-spacing: 2px; }
+  .nav-links { display: flex; gap: 36px; }
+  .nav-links a { color: var(--gray); font-size: 13px; font-weight: 600; text-decoration: none; letter-spacing: 1px; text-transform: uppercase; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--mint); }
+  .nav-cta {
+    background: var(--mint); color: #000; font-weight: 800; font-size: 12px;
+    padding: 10px 24px; border-radius: 24px; text-decoration: none; letter-spacing: 1px;
+    text-transform: uppercase; transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .nav-cta:hover { box-shadow: 0 0 24px var(--mint); transform: scale(1.04); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+    padding: 140px 24px 80px; position: relative; z-index: 1;
+  }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid var(--mint); color: var(--mint); font-size: 11px;
+    font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    padding: 6px 16px; border-radius: 24px; margin-bottom: 32px;
+    animation: fadeUp 0.8s ease both;
+  }
+  .hero-tag span { width: 6px; height: 6px; background: var(--mint); border-radius: 50%; animation: pulse 1.5s infinite; }
+  .hero-h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(72px, 12vw, 160px);
+    line-height: 0.9; letter-spacing: -2px;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+  .hero-h1 em { color: var(--mint); font-style: normal; }
+  .hero-sub {
+    max-width: 560px; margin: 28px auto 0;
+    font-size: 17px; color: var(--gray); line-height: 1.7; font-weight: 500;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+  .hero-btns {
+    display: flex; gap: 16px; margin-top: 48px; flex-wrap: wrap; justify-content: center;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+  .btn-primary {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--mint); color: #000; font-weight: 800; font-size: 14px;
+    padding: 16px 32px; border-radius: 32px; text-decoration: none; letter-spacing: 0.5px;
+    transition: box-shadow 0.3s, transform 0.2s;
+  }
+  .btn-primary:hover { box-shadow: 0 0 32px var(--mint)88; transform: translateY(-2px); }
+  .btn-secondary {
+    display: flex; align-items: center; gap: 10px;
+    background: transparent; color: var(--light); font-weight: 700; font-size: 14px;
+    padding: 15px 32px; border-radius: 32px; text-decoration: none;
+    border: 1.5px solid #ffffff22; transition: border-color 0.2s, transform 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--mint); transform: translateY(-2px); }
+  .hero-stat-row {
+    display: flex; gap: 48px; margin-top: 72px; justify-content: center;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+  .hero-stat { text-align: center; }
+  .hero-stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 42px; color: var(--mint); line-height: 1; }
+  .hero-stat-label { font-size: 11px; color: var(--gray); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-top: 4px; }
+
+  /* Scroll indicator */
+  .scroll-hint {
+    position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: var(--gray); font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    animation: fadeUp 1s 0.8s ease both;
+  }
+  .scroll-line {
+    width: 1px; height: 48px; background: linear-gradient(to bottom, var(--mint), transparent);
+    animation: scrollPulse 2s infinite;
+  }
+
+  /* ── MARQUEE ── */
+  .marquee-wrap { overflow: hidden; padding: 24px 0; border-top: 1px solid #ffffff08; border-bottom: 1px solid #ffffff08; position: relative; z-index: 1; }
+  .marquee-track {
+    display: flex; gap: 48px; width: max-content;
+    animation: marquee 24s linear infinite;
+  }
+  .marquee-item { display: flex; align-items: center; gap: 12px; font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--gray); letter-spacing: 2px; white-space: nowrap; }
+  .marquee-dot { width: 6px; height: 6px; background: var(--mint); border-radius: 50%; }
+
+  /* ── FEATURES ── */
+  .section { padding: 100px 48px; position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; }
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--mint); margin-bottom: 16px; }
+  .section-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(42px, 6vw, 72px); line-height: 1; margin-bottom: 60px; }
+
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2px; }
+  .feature-card {
+    background: var(--card); padding: 36px 32px;
+    transition: background 0.3s, transform 0.3s;
+    position: relative; overflow: hidden;
+  }
+  .feature-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, var(--mint-dim), transparent);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .feature-card:hover { background: #161616; transform: translateY(-4px); }
+  .feature-card:hover::before { opacity: 1; }
+  .feature-icon { font-size: 36px; margin-bottom: 20px; }
+  .feature-name { font-weight: 800; font-size: 16px; margin-bottom: 10px; }
+  .feature-desc { font-size: 13px; color: var(--gray); line-height: 1.7; }
+
+  /* ── PHONE MOCKUP ── */
+  .phone-section {
+    padding: 100px 48px; position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 80px;
+    max-width: 1200px; margin: 0 auto; flex-wrap: wrap;
+  }
+  .phone-text { flex: 1; min-width: 280px; }
+  .phone-mockup-wrap { flex: 1; min-width: 280px; display: flex; justify-content: center; }
+  .phone {
+    width: 260px; height: 520px; background: var(--card);
+    border-radius: 44px; border: 1.5px solid #ffffff12;
+    box-shadow: 0 0 80px #00F5C820, 0 40px 80px #00000080;
+    overflow: hidden; position: relative;
+    display: flex; flex-direction: column;
+  }
+  .phone-notch {
+    width: 80px; height: 28px; background: var(--black);
+    border-radius: 0 0 20px 20px; margin: 0 auto;
+    position: relative; z-index: 2;
+  }
+  .phone-screen { flex: 1; padding: 0 12px 12px; display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+  .phone-header { display: flex; justify-content: space-between; align-items: center; padding: 0 4px; }
+  .phone-logo { font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: var(--mint); }
+  .phone-post {
+    background: #1a1a1a; border-radius: 12px; overflow: hidden;
+  }
+  .phone-post-media {
+    height: 140px; display: flex; align-items: center; justify-content: center;
+    font-size: 48px; background: linear-gradient(135deg, #1a1a1a, #222);
+  }
+  .phone-post-info { padding: 10px; }
+  .phone-post-user { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+  .phone-avatar { width: 20px; height: 20px; border-radius: 50%; background: var(--mint-dim); border: 1px solid var(--mint); display: flex; align-items: center; justify-content: center; font-size: 9px; color: var(--mint); font-weight: 700; }
+  .phone-username { font-size: 10px; font-weight: 700; }
+  .phone-verified { color: var(--mint); font-size: 9px; }
+  .phone-reactions { display: flex; gap: 10px; }
+  .phone-react { font-size: 9px; color: var(--gray); display: flex; align-items: center; gap: 3px; }
+  .phone-nav { display: flex; justify-content: space-around; padding: 8px 0 4px; border-top: 1px solid #ffffff08; }
+  .phone-nav-icon { font-size: 16px; }
+  .phone-nav-icon.active { filter: drop-shadow(0 0 4px var(--mint)); }
+
+  /* ── PRICING ── */
+  .pricing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; max-width: 700px; }
+  .price-card {
+    background: var(--card); padding: 40px 36px; position: relative; overflow: hidden;
+  }
+  .price-card.premium { background: linear-gradient(135deg, #0a1a15, #111); border: 1.5px solid var(--mint)44; }
+  .price-card.premium::before {
+    content: 'MOST POPULAR'; position: absolute; top: 16px; right: 16px;
+    background: var(--mint); color: #000; font-size: 9px; font-weight: 800;
+    padding: 3px 10px; border-radius: 12px; letter-spacing: 1px;
+  }
+  .price-name { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gray); margin-bottom: 12px; }
+  .price-amount { font-family: 'Bebas Neue', sans-serif; font-size: 52px; color: var(--mint); line-height: 1; margin-bottom: 4px; }
+  .price-period { font-size: 12px; color: var(--gray); margin-bottom: 24px; }
+  .price-features { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .price-features li { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--gray); }
+  .price-features li span.check { color: var(--mint); font-size: 14px; }
+
+  /* ── KEYWORDS ── */
+  .keywords-wrap { display: flex; flex-wrap: wrap; gap: 10px; }
+  .keyword {
+    background: var(--card); border: 1px solid #ffffff0a; border-radius: 24px;
+    padding: 8px 18px; font-size: 12px; font-weight: 600; color: var(--gray);
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .keyword:hover { border-color: var(--mint); color: var(--mint); cursor: default; }
+
+  /* ── MARKETING PHASES ── */
+  .phases { display: flex; flex-direction: column; gap: 0; }
+  .phase {
+    display: flex; gap: 32px; padding: 36px 0;
+    border-bottom: 1px solid #ffffff08; align-items: flex-start;
+  }
+  .phase-num { font-family: 'Bebas Neue', sans-serif; font-size: 64px; color: var(--mint); opacity: 0.3; line-height: 1; min-width: 80px; }
+  .phase-content {}
+  .phase-title { font-weight: 800; font-size: 18px; margin-bottom: 8px; }
+  .phase-desc { font-size: 13px; color: var(--gray); line-height: 1.8; }
+  .phase-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .phase-tag { background: var(--mint-dim); color: var(--mint); font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 16px; }
+
+  /* ── CTA BANNER ── */
+  .cta-banner {
+    margin: 0 48px 100px; padding: 80px 60px;
+    background: linear-gradient(135deg, #0a1a15 0%, #000 60%);
+    border: 1px solid var(--mint)22; border-radius: 24px;
+    text-align: center; position: relative; z-index: 1; overflow: hidden;
+  }
+  .cta-banner::before {
+    content: ''; position: absolute; top: -100px; right: -100px;
+    width: 400px; height: 400px; border-radius: 50%;
+    background: var(--mint); filter: blur(160px); opacity: 0.07;
+  }
+  .cta-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(40px, 6vw, 80px); margin-bottom: 20px; }
+  .cta-sub { font-size: 16px; color: var(--gray); margin-bottom: 40px; max-width: 480px; margin-left: auto; margin-right: auto; }
+  .store-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  .store-btn {
+    display: flex; align-items: center; gap: 12px;
+    background: #111; border: 1.5px solid #ffffff15;
+    padding: 14px 28px; border-radius: 16px; text-decoration: none; color: var(--light);
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .store-btn:hover { border-color: var(--mint); transform: translateY(-3px); }
+  .store-btn-icon { font-size: 28px; }
+  .store-btn-text { text-align: left; }
+  .store-btn-small { font-size: 10px; color: var(--gray); font-weight: 500; }
+  .store-btn-big { font-size: 16px; font-weight: 800; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid #ffffff08; padding: 40px 48px;
+    display: flex; justify-content: space-between; align-items: center;
+    position: relative; z-index: 1; flex-wrap: wrap; gap: 16px;
+  }
+  .footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--mint); }
+  .footer-tagline { font-size: 12px; color: var(--gray); }
+  .footer-links { display: flex; gap: 24px; }
+  .footer-links a { font-size: 12px; color: var(--gray); text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--mint); }
+
+  /* ── ANIMS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; } 50% { opacity: 0.3; }
+  }
+  @keyframes scrollPulse {
+    0% { transform: scaleY(0); transform-origin: top; }
+    50% { transform: scaleY(1); transform-origin: top; }
+    51% { transform: scaleY(1); transform-origin: bottom; }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+  }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+
+  .phone { animation: float 4s ease-in-out infinite; }
+
+  /* Fade-in on scroll */
+  .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 768px) {
+    nav { padding: 16px 20px; }
+    .nav-links { display: none; }
+    .section { padding: 64px 20px; }
+    .phone-section { padding: 64px 20px; flex-direction: column; }
+    .cta-banner { margin: 0 20px 64px; padding: 48px 24px; }
+    footer { padding: 32px 20px; }
+    .pricing-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">TRENDLY</div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#marketing">Launch</a>
+  </div>
+  <a href="#download" class="nav-cta">Get Early Access</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag"><span></span> Now in Beta</div>
+  <h1 class="hero-h1">WHERE YOUR<br>WORLD GOES <em>VIRAL</em></h1>
+  <p class="hero-sub">Trendly blends the best of Facebook, Instagram, and TikTok into one fast, clean, creator-powered platform. Create. Share. Trend.</p>
+  <div class="hero-btns">
+    <a href="#download" class="btn-primary">🍎 Download on iOS</a>
+    <a href="#download" class="btn-secondary">▶ Get it on Android</a>
+  </div>
+  <div class="hero-stat-row">
+    <div class="hero-stat">
+      <div class="hero-stat-num">4.8★</div>
+      <div class="hero-stat-label">App Rating</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">12+</div>
+      <div class="hero-stat-label">Age Rating</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">#3</div>
+      <div class="hero-stat-label">Social Charts</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">FREE</div>
+      <div class="hero-stat-label">To Download</div>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    Scroll
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <div class="marquee-item"><div class="marquee-dot"></div>CREATE YOUR MOMENT</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>GO VIRAL TODAY</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>BUILT FOR CREATORS</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>NO SHADOWBANNING</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>REAL REACH</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>CREATE YOUR MOMENT</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>GO VIRAL TODAY</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>BUILT FOR CREATORS</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>NO SHADOWBANNING</div>
+    <div class="marquee-item"><div class="marquee-dot"></div>REAL REACH</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="section reveal" id="features">
+  <div class="section-label">What You Get</div>
+  <h2 class="section-title">EVERYTHING.<br>ONE APP.</h2>
+  <div class="features-grid">
+    <div class="feature-card reveal">
+      <div class="feature-icon">🎥</div>
+      <div class="feature-name">Video Feed</div>
+      <div class="feature-desc">Endless short videos powered by the Trendly Smart Boost system — giving new creators a real chance to shine.</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">📸</div>
+      <div class="feature-name">Photo Feed</div>
+      <div class="feature-desc">High-quality photo sharing with clean layouts, instant likes, comments, and reactions.</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">📝</div>
+      <div class="feature-name">Long Posts</div>
+      <div class="feature-desc">Write what's on your mind. Stories, thoughts, updates, or full blog-style posts — your voice, your way.</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">🔥</div>
+      <div class="feature-name">Explore / TrendZone</div>
+      <div class="feature-desc">Trending videos, top creators, viral hashtags, and content tailored exactly to you.</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">💬</div>
+      <div class="feature-name">Instant DMs</div>
+      <div class="feature-desc">Chat instantly with friends, fans, and creators — no friction, just fast conversation.</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">🛠️</div>
+      <div class="feature-name">Creator Tools</div>
+      <div class="feature-desc">Video editor, photo filters, caption helper, and a viral audio library coming soon.</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">👤</div>
+      <div class="feature-name">Profiles Built to Pop</div>
+      <div class="feature-desc">Clean, beautiful profiles with your posts, videos, followers, and bio all organized perfectly.</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">🔒</div>
+      <div class="feature-name">Safe & Secure</div>
+      <div class="feature-desc">Advanced protection so your profile, content, and community always stay yours.</div>
+    </div>
+  </div>
+</section>
+
+<!-- PHONE MOCKUP + WHY DIFFERENT -->
+<div class="phone-section reveal">
+  <div class="phone-text">
+    <div class="section-label">Why We're Different</div>
+    <h2 class="section-title" style="font-size:clamp(36px,5vw,60px)">BUILT FOR<br>CREATORS.<br>NOT <em style="color:var(--mint)">CORPORATIONS.</em></h2>
+    <ul style="list-style:none;display:flex;flex-direction:column;gap:16px;margin-top:8px">
+      <li style="display:flex;align-items:flex-start;gap:12px;font-size:14px;color:var(--gray)"><span style="color:var(--mint);font-size:18px">✦</span> No shadowbanning — real reach from day one</li>
+      <li style="display:flex;align-items:flex-start;gap:12px;font-size:14px;color:var(--gray)"><span style="color:var(--mint);font-size:18px">✦</span> No pay-for-views — merit wins here</li>
+      <li style="display:flex;align-items:flex-start;gap:12px;font-size:14px;color:var(--gray)"><span style="color:var(--mint);font-size:18px">✦</span> No complicated menus — just create and go</li>
+      <li style="display:flex;align-items:flex-start;gap:12px;font-size:14px;color:var(--gray)"><span style="color:var(--mint);font-size:18px">✦</span> Ultra-fast feed — smooth, secure, reliable</li>
+      <li style="display:flex;align-items:flex-start;gap:12px;font-size:14px;color:var(--gray)"><span style="color:var(--mint);font-size:18px">✦</span> Smart Boost algorithm gives new creators a shot</li>
+    </ul>
+  </div>
+  <div class="phone-mockup-wrap">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="phone-header">
+          <div class="phone-logo">TRENDLY</div>
+          <span style="font-size:13px">🔍</span>
+        </div>
+        <!-- Post 1 -->
+        <div class="phone-post">
+          <div class="phone-post-media">🌅</div>
+          <div class="phone-post-info">
+            <div class="phone-post-user">
+              <div class="phone-avatar">JB</div>
+              <span class="phone-username">jay.breezy</span>
+              <span class="phone-verified">✦</span>
+            </div>
+            <div class="phone-reactions">
+              <span class="phone-react">🔥 1.3K</span>
+              <span class="phone-react">💬 89</span>
+              <span class="phone-react">↗ 45</span>
+            </div>
+          </div>
+        </div>
+        <!-- Post 2 -->
+        <div class="phone-post">
+          <div class="phone-post-media">🌃</div>
+          <div class="phone-post-info">
+            <div class="phone-post-user">
+              <div class="phone-avatar">LX</div>
+              <span class="phone-username">_its.luxx</span>
+              <span class="phone-verified">✦</span>
+            </div>
+            <div class="phone-reactions">
+              <span class="phone-react">🔥 980</span>
+              <span class="phone-react">💬 56</span>
+              <span class="phone-react">↗ 22</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-nav">
+        <span class="phone-nav-icon active">🏠</span>
+        <span class="phone-nav-icon">🔍</span>
+        <span style="width:28px;height:28px;background:var(--mint);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:16px">+</span>
+        <span class="phone-nav-icon">💬</span>
+        <span class="phone-nav-icon">👤</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<section class="section reveal" id="pricing">
+  <div class="section-label">Monetization</div>
+  <h2 class="section-title">TRENDLY+<br>& BOOSTS</h2>
+  <div class="pricing-grid">
+    <div class="price-card reveal">
+      <div class="price-name">Free</div>
+      <div class="price-amount">$0</div>
+      <div class="price-period">forever</div>
+      <ul class="price-features">
+        <li><span class="check">✦</span> Full video & photo feed</li>
+        <li><span class="check">✦</span> DMs & community</li>
+        <li><span class="check">✦</span> Explore & TrendZone</li>
+        <li><span class="check">✦</span> Reactions & comments</li>
+        <li><span class="check">✦</span> Standard uploads</li>
+      </ul>
+    </div>
+    <div class="price-card premium reveal">
+      <div class="price-name">Trendly+</div>
+      <div class="price-amount">$1.99</div>
+      <div class="price-period">per month</div>
+      <ul class="price-features">
+        <li><span class="check">✦</span> Premium badge ⭐</li>
+        <li><span class="check">✦</span> Priority feed exposure</li>
+        <li><span class="check">✦</span> Exclusive profile themes</li>
+        <li><span class="check">✦</span> Custom fonts</li>
+        <li><span class="check">✦</span> Longer video uploads</li>
+        <li><span class="check">✦</span> No ads</li>
+      </ul>
+    </div>
+  </div>
+  <div style="margin-top:32px;padding:28px 32px;background:var(--card);border-left:3px solid var(--mint);max-width:500px" class="reveal">
+    <div style="font-weight:800;font-size:15px;margin-bottom:8px">⚡ Trend Boost — $1.99</div>
+    <div style="font-size:13px;color:var(--gray);line-height:1.7">Pay once to push any post directly into the TrendZone and reach millions. Choose 1 Day, 3 Days, or 7 Days exposure.</div>
+  </div>
+</section>
+
+<!-- MARKETING PHASES -->
+<section class="section reveal" id="marketing">
+  <div class="section-label">Launch Strategy</div>
+  <h2 class="section-title">4-PHASE<br>GROWTH PLAN</h2>
+  <div class="phases">
+    <div class="phase reveal">
+      <div class="phase-num">01</div>
+      <div class="phase-content">
+        <div class="phase-title">Start With YOU</div>
+        <div class="phase-desc">You are the face of Trendly for launch. Post behind-the-scenes, app previews, and urban-style promo videos. Use your music to fuel the brand identity.</div>
+      </div>
+    </div>
+    <div class="phase reveal">
+      <div class="phase-num">02</div>
+      <div class="phase-content">
+        <div class="phase-title">Creator Program</div>
+        <div class="phase-desc">Recruit small creators with early badges, verified checkmarks, and boosted exposure. Get them in before the big names — they'll bring their audiences.</div>
+        <div class="phase-tags"><span class="phase-tag">Early Badge</span><span class="phase-tag">Verified ✦</span><span class="phase-tag">Boost Exposure</span></div>
+      </div>
+    </div>
+    <div class="phase reveal">
+      <div class="phase-num">03</div>
+      <div class="phase-content">
+        <div class="phase-title">Viral Hashtag Launch</div>
+        <div class="phase-desc">Coordinate a hashtag wave across TikTok and Instagram. Seed it with your content, then let the community run with it.</div>
+        <div class="phase-tags"><span class="phase-tag">#TrendWithMe</span><span class="phase-tag">#TrendlyWave</span><span class="phase-tag">#MakeItTrend</span></div>
+      </div>
+    </div>
+    <div class="phase reveal">
+      <div class="phase-num">04</div>
+      <div class="phase-content">
+        <div class="phase-title">Teen + Young Adult Push</div>
+        <div class="phase-desc">This demographic grows apps faster than any other. Target 16–24 through TikTok and IG Reels ads using your music and brand aesthetic.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KEYWORDS -->
+<section class="section reveal">
+  <div class="section-label">App Store Keywords</div>
+  <h2 class="section-title" style="font-size:clamp(32px,4vw,52px);margin-bottom:32px">SEARCH<br>OPTIMIZED</h2>
+  <div class="keywords-wrap">
+    <div class="keyword">social media</div>
+    <div class="keyword">video app</div>
+    <div class="keyword">photo app</div>
+    <div class="keyword">creator app</div>
+    <div class="keyword">editing app</div>
+    <div class="keyword">go viral</div>
+    <div class="keyword">short videos</div>
+    <div class="keyword">live videos</div>
+    <div class="keyword">DM app</div>
+    <div class="keyword">explore feed</div>
+    <div class="keyword">friends app</div>
+    <div class="keyword">community app</div>
+    <div class="keyword">trending content</div>
+    <div class="keyword">creator tools</div>
+    <div class="keyword">smart boost</div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-banner reveal" id="download">
+  <h2 class="cta-title">JOIN THE NEXT<br>GENERATION OF<br>SOCIAL MEDIA</h2>
+  <p class="cta-sub">A new way to create, connect, and go viral. Free forever. Download now.</p>
+  <div class="store-btns">
+    <a href="#" class="store-btn">
+      <span class="store-btn-icon">🍎</span>
+      <div class="store-btn-text">
+        <div class="store-btn-small">DOWNLOAD ON THE</div>
+        <div class="store-btn-big">App Store</div>
+      </div>
+    </a>
+    <a href="#" class="store-btn">
+      <span class="store-btn-icon">▶</span>
+      <div class="store-btn-text">
+        <div class="store-btn-small">GET IT ON</div>
+        <div class="store-btn-big">Google Play</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-logo">TRENDLY</div>
+    <div class="footer-tagline">Create. Share. Trend.</div>
+  </div>
+  <div class="footer-links">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#">Contact</a>
+    <a href="#">Press</a>
+  </div>
+  <div style="font-size:12px;color:var(--gray)">© 2026 Trendly Inc.</div>
+</footer>
+
+<script>
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+    ring.style.left = e.clientX + 'px';
+    ring.style.top = e.clientY + 'px';
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

@@ -1,0 +1,533 @@
+import { useState } from "react";
+
+const MINT = "#3DFFBD";
+const BG = "#000000";
+const SURFACE = "#1A1A1A";
+const CARD = "#111111";
+const GRAY = "#919191";
+const LIGHT = "#F2F2F2";
+
+const styles = {
+  app: {
+    background: BG,
+    minHeight: "100vh",
+    fontFamily: "'Montserrat', sans-serif",
+    color: LIGHT,
+    display: "flex",
+    flexDirection: "column",
+    maxWidth: 430,
+    margin: "0 auto",
+    position: "relative",
+    overflow: "hidden",
+  },
+};
+
+// ── Mock Data ──────────────────────────────────────────────────────────────
+const USERS = [
+  { id: 1, handle: "jay.breezy", name: "Jay Breezy", verified: true, avatar: "JB", posts: 128, followers: "24.6K", following: 178, bio: "Artist | Creator | Dreamer\nNYC – Living my best life\n#CreateShareTrend" },
+  { id: 2, handle: "_its.luxx", name: "Lux", verified: true, avatar: "LX", posts: 312, followers: "18.3K", following: 94, bio: "Dreamer | Creator | Visionary\nLiving my best life\n#CreateShareTrend" },
+  { id: 3, handle: "sarah.k", name: "Sarah K", verified: false, avatar: "SK", posts: 54, followers: "2.1K", following: 320, bio: "Lifestyle & Travel 🌍" },
+  { id: 4, handle: "mike", name: "Mike", verified: false, avatar: "MK", posts: 87, followers: "5.4K", following: 210, bio: "Music producer 🎵" },
+];
+
+const POSTS = [
+  { id: 1, userId: 1, type: "video", label: "Summer Vibes", views: "12.5K", likes: "1.3K", comments: 89, shares: 45, tags: ["#summervibes", "#nyc"], time: "2h", thumbnail: "🌅" },
+  { id: 2, userId: 2, type: "photo", label: "City Lights", views: "9.6K", likes: "980", comments: 56, shares: 22, tags: ["#citylights", "#streetwear"], time: "4h", thumbnail: "🌃" },
+  { id: 3, userId: 3, type: "video", label: "Morning Routine", views: "4.2K", likes: "430", comments: 31, shares: 10, tags: ["#lifestyle", "#morning"], time: "6h", thumbnail: "☀️" },
+  { id: 4, userId: 4, type: "video", label: "Studio Session", views: "7.8K", likes: "860", comments: 74, shares: 33, tags: ["#music", "#producer"], time: "1d", thumbnail: "🎧" },
+  { id: 5, userId: 1, type: "photo", label: "NYC Streets", views: "3.1K", likes: "290", comments: 18, shares: 7, tags: ["#nyc", "#urban"], time: "1d", thumbnail: "🏙️" },
+];
+
+const TRENDING = [
+  { tag: "#SummerVibes", posts: "12.5K" },
+  { tag: "#NightLife", posts: "8.9K" },
+  { tag: "#StreetWear", posts: "6.2K" },
+  { tag: "#TechTalk", posts: "4.7K" },
+  { tag: "#FoodVibes", posts: "3.8K" },
+  { tag: "#TravelGoals", posts: "3.1K" },
+];
+
+const NOTIFS = [
+  { id: 1, userId: 3, action: "liked your post", time: "2m", icon: "❤️" },
+  { id: 2, userId: 4, action: "commented: 🔥🔥🔥", time: "5m", icon: "💬" },
+  { id: 3, userId: 2, action: "started following you", time: "30m", icon: "👤" },
+  { id: 4, userId: 1, action: "mentioned you in a post", time: "1h", icon: "📌" },
+];
+
+const MESSAGES = [
+  { id: 1, userId: 3, text: "Your post was 🔥🔥", time: "2m", unread: 2 },
+  { id: 2, userId: 4, text: "That solo was incredible 🎶", time: "10m", unread: 0 },
+  { id: 3, userId: 2, text: "Yaaas! 🙌", time: "1h", unread: 1 },
+];
+
+// ── Helpers ─────────────────────────────────────────────────────────────
+function Avatar({ user, size = 36 }) {
+  const colors = ["#3DFFBD22", "#3DFFBD33", "#ffffff11", "#3DFFBD44"];
+  const bg = colors[user.id % colors.length];
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: "50%",
+      background: bg, border: `1.5px solid ${MINT}44`,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      fontSize: size * 0.35, fontWeight: 700, color: MINT, flexShrink: 0,
+    }}>
+      {user.avatar}
+    </div>
+  );
+}
+
+function MintBtn({ children, onClick, small, outline, style: sx }) {
+  return (
+    <button onClick={onClick} style={{
+      background: outline ? "transparent" : MINT,
+      color: outline ? MINT : "#000",
+      border: `1.5px solid ${MINT}`,
+      borderRadius: 20,
+      padding: small ? "4px 14px" : "8px 22px",
+      fontFamily: "'Montserrat', sans-serif",
+      fontWeight: 700,
+      fontSize: small ? 11 : 13,
+      cursor: "pointer",
+      whiteSpace: "nowrap",
+      ...sx,
+    }}>
+      {children}
+    </button>
+  );
+}
+
+function TrendlyLogo({ size = 22 }) {
+  return (
+    <span style={{ color: MINT, fontWeight: 900, fontSize: size, letterSpacing: -0.5 }}>
+      TRENDLY
+    </span>
+  );
+}
+
+// ── Screens ──────────────────────────────────────────────────────────────
+
+function HomeScreen({ onProfile }) {
+  const [liked, setLiked] = useState({});
+  const toggle = (id) => setLiked(p => ({ ...p, [id]: !p[id] }));
+
+  return (
+    <div style={{ flex: 1, overflowY: "auto", paddingBottom: 70 }}>
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 16px 10px", position: "sticky", top: 0, background: BG, zIndex: 10, borderBottom: `1px solid #ffffff0a` }}>
+        <TrendlyLogo />
+        <div style={{ display: "flex", gap: 16 }}>
+          <TabPill label="For You" active />
+          <TabPill label="Following" />
+        </div>
+        <span style={{ fontSize: 20, cursor: "pointer" }}>🔍</span>
+      </div>
+
+      {/* Stories row */}
+      <div style={{ display: "flex", gap: 12, padding: "12px 16px", overflowX: "auto" }}>
+        {USERS.map(u => (
+          <div key={u.id} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, cursor: "pointer" }} onClick={() => onProfile(u)}>
+            <div style={{ padding: 2, borderRadius: "50%", background: `linear-gradient(135deg, ${MINT}, #00bfff)` }}>
+              <div style={{ padding: 2, borderRadius: "50%", background: BG }}>
+                <Avatar user={u} size={48} />
+              </div>
+            </div>
+            <span style={{ fontSize: 10, color: GRAY, maxWidth: 52, textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.handle}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Feed */}
+      {POSTS.map(post => {
+        const user = USERS.find(u => u.id === post.userId);
+        return (
+          <div key={post.id} style={{ borderBottom: `1px solid #ffffff08`, padding: "14px 16px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+              <Avatar user={user} size={36} />
+              <div style={{ flex: 1 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                  <span style={{ fontWeight: 700, fontSize: 13 }}>{user.handle}</span>
+                  {user.verified && <span style={{ color: MINT, fontSize: 11 }}>✦</span>}
+                </div>
+                <span style={{ fontSize: 11, color: GRAY }}>{post.time}</span>
+              </div>
+              <MintBtn small outline>Follow</MintBtn>
+            </div>
+
+            {/* Media thumbnail */}
+            <div style={{
+              background: SURFACE, borderRadius: 12, height: 220,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 64, marginBottom: 10, position: "relative", overflow: "hidden",
+              border: `1px solid #ffffff08`,
+            }}>
+              {post.thumbnail}
+              {post.type === "video" && (
+                <div style={{ position: "absolute", bottom: 8, left: 8, background: "#000000aa", borderRadius: 20, padding: "2px 8px", fontSize: 11, color: LIGHT }}>
+                  ▶ {post.views} views
+                </div>
+              )}
+              <div style={{ position: "absolute", top: 8, right: 8, background: "#000000aa", borderRadius: 20, padding: "2px 8px", fontSize: 11, color: MINT }}>
+                {post.type === "video" ? "📹 VIDEO" : "📸 PHOTO"}
+              </div>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 8 }}>
+              <ActionBtn icon={liked[post.id] ? "❤️" : "🤍"} label={liked[post.id] ? String(parseInt(post.likes) + 1) + (post.likes.includes("K") ? "" : "") : post.likes} onClick={() => toggle(post.id)} active={liked[post.id]} />
+              <ActionBtn icon="💬" label={post.comments} />
+              <ActionBtn icon="↗️" label={post.shares} />
+              <div style={{ marginLeft: "auto" }}>
+                <ActionBtn icon="🔖" label="" />
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {post.tags.map(t => (
+                <span key={t} style={{ fontSize: 11, color: MINT }}>{t}</span>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function TabPill({ label, active }) {
+  return (
+    <span style={{
+      fontSize: 13, fontWeight: active ? 700 : 500,
+      color: active ? LIGHT : GRAY,
+      borderBottom: active ? `2px solid ${MINT}` : "2px solid transparent",
+      paddingBottom: 2, cursor: "pointer",
+    }}>{label}</span>
+  );
+}
+
+function ActionBtn({ icon, label, onClick, active }) {
+  return (
+    <button onClick={onClick} style={{
+      background: "none", border: "none", cursor: "pointer",
+      display: "flex", alignItems: "center", gap: 4,
+      color: active ? MINT : GRAY, fontSize: 13, fontFamily: "'Montserrat', sans-serif",
+      fontWeight: 600, padding: 0,
+    }}>
+      <span style={{ fontSize: 16 }}>{icon}</span>
+      {label && <span>{label}</span>}
+    </button>
+  );
+}
+
+function ExploreScreen() {
+  const [q, setQ] = useState("");
+  return (
+    <div style={{ flex: 1, overflowY: "auto", paddingBottom: 70 }}>
+      <div style={{ padding: "16px 16px 10px", position: "sticky", top: 0, background: BG, zIndex: 10, borderBottom: `1px solid #ffffff0a` }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, background: SURFACE, borderRadius: 24, padding: "8px 16px" }}>
+          <span>🔍</span>
+          <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search tags, people, vibes…"
+            style={{ background: "none", border: "none", outline: "none", color: LIGHT, fontFamily: "'Montserrat', sans-serif", fontSize: 13, flex: 1 }} />
+        </div>
+      </div>
+
+      <div style={{ padding: "16px 16px 0" }}>
+        <SectionLabel>🔥 Trending Now</SectionLabel>
+        {TRENDING.map(t => (
+          <div key={t.tag} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderBottom: `1px solid #ffffff08` }}>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 14, color: MINT }}>{t.tag}</div>
+              <div style={{ fontSize: 11, color: GRAY }}>{t.posts} posts</div>
+            </div>
+            <MintBtn small outline>View</MintBtn>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ padding: "20px 16px 0" }}>
+        <SectionLabel>👥 Suggested for You</SectionLabel>
+        {USERS.slice(1).map(u => (
+          <div key={u.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: `1px solid #ffffff08` }}>
+            <Avatar user={u} size={40} />
+            <div style={{ flex: 1 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <span style={{ fontWeight: 700, fontSize: 13 }}>{u.handle}</span>
+                {u.verified && <span style={{ color: MINT, fontSize: 10 }}>✦</span>}
+              </div>
+              <span style={{ fontSize: 11, color: GRAY }}>{u.followers} followers</span>
+            </div>
+            <MintBtn small>Follow</MintBtn>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CreateScreen({ onClose }) {
+  const [step, setStep] = useState(0); // 0=pick, 1=composing
+  const [type, setType] = useState(null);
+  const [caption, setCaption] = useState("");
+
+  if (step === 1) return (
+    <div style={{ flex: 1, overflowY: "auto", paddingBottom: 70 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 16px 10px", borderBottom: `1px solid #ffffff0a` }}>
+        <button onClick={() => setStep(0)} style={{ background: "none", border: "none", color: GRAY, fontSize: 20, cursor: "pointer" }}>✕</button>
+        <span style={{ fontWeight: 700, fontSize: 16 }}>New {type === "video" ? "Video" : type === "photo" ? "Photo" : "Live"}</span>
+        <div style={{ marginLeft: "auto" }}>
+          <MintBtn small onClick={onClose}>Post</MintBtn>
+        </div>
+      </div>
+      <div style={{ margin: 16, background: SURFACE, borderRadius: 16, height: 280, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 64, border: `1px solid #ffffff08` }}>
+        {type === "video" ? "📹" : type === "photo" ? "📸" : "📡"}
+      </div>
+      <div style={{ padding: "0 16px" }}>
+        <textarea value={caption} onChange={e => setCaption(e.target.value)}
+          placeholder="Write a caption, add tags…"
+          style={{
+            width: "100%", background: SURFACE, border: `1px solid #ffffff0a`,
+            borderRadius: 12, padding: 12, color: LIGHT, fontFamily: "'Montserrat', sans-serif",
+            fontSize: 13, resize: "none", height: 100, boxSizing: "border-box",
+          }} />
+        <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+          {["#trending", "#fyp", "#vibes"].map(t => (
+            <span key={t} style={{ fontSize: 12, color: MINT, background: `${MINT}15`, padding: "3px 10px", borderRadius: 20 }}>{t}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ flex: 1, overflowY: "auto", paddingBottom: 70 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 16px 10px", borderBottom: `1px solid #ffffff0a` }}>
+        <button onClick={onClose} style={{ background: "none", border: "none", color: GRAY, fontSize: 20, cursor: "pointer" }}>✕</button>
+        <span style={{ fontWeight: 700, fontSize: 16 }}>Create</span>
+      </div>
+      <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
+        {[
+          { icon: "📹", label: "Upload Video", sub: "Share your moments", type: "video" },
+          { icon: "📸", label: "Upload Photo", sub: "Express your style", type: "photo" },
+          { icon: "📡", label: "Go Live", sub: "Stream to your followers", type: "live" },
+        ].map(item => (
+          <button key={item.type} onClick={() => { setType(item.type); setStep(1); }}
+            style={{
+              background: SURFACE, border: `1px solid ${MINT}22`, borderRadius: 16,
+              padding: "20px 20px", display: "flex", alignItems: "center", gap: 16,
+              cursor: "pointer", textAlign: "left",
+            }}>
+            <span style={{ fontSize: 36 }}>{item.icon}</span>
+            <div>
+              <div style={{ color: LIGHT, fontWeight: 700, fontSize: 15, fontFamily: "'Montserrat', sans-serif" }}>{item.label}</div>
+              <div style={{ color: GRAY, fontSize: 12, fontFamily: "'Montserrat', sans-serif" }}>{item.sub}</div>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function NotifScreen() {
+  return (
+    <div style={{ flex: 1, overflowY: "auto", paddingBottom: 70 }}>
+      <div style={{ padding: "16px 16px 10px", borderBottom: `1px solid #ffffff0a` }}>
+        <span style={{ fontWeight: 800, fontSize: 18 }}>Notifications</span>
+      </div>
+      <div style={{ padding: "8px 0" }}>
+        {NOTIFS.map(n => {
+          const user = USERS.find(u => u.id === n.userId);
+          return (
+            <div key={n.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderBottom: `1px solid #ffffff06` }}>
+              <div style={{ position: "relative" }}>
+                <Avatar user={user} size={40} />
+                <span style={{ position: "absolute", bottom: -2, right: -4, fontSize: 14 }}>{n.icon}</span>
+              </div>
+              <div style={{ flex: 1 }}>
+                <span style={{ fontWeight: 700, fontSize: 13 }}>{user.handle}</span>
+                <span style={{ color: GRAY, fontSize: 13 }}> {n.action}</span>
+                <div style={{ fontSize: 11, color: GRAY, marginTop: 2 }}>{n.time}</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function InboxScreen() {
+  return (
+    <div style={{ flex: 1, overflowY: "auto", paddingBottom: 70 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 16px 10px", borderBottom: `1px solid #ffffff0a` }}>
+        <span style={{ fontWeight: 800, fontSize: 18 }}>Inbox</span>
+        <span style={{ color: MINT, fontSize: 20, cursor: "pointer" }}>✏️</span>
+      </div>
+      {MESSAGES.map(m => {
+        const user = USERS.find(u => u.id === m.userId);
+        return (
+          <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", borderBottom: `1px solid #ffffff06`, cursor: "pointer" }}>
+            <Avatar user={user} size={44} />
+            <div style={{ flex: 1 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <span style={{ fontWeight: 700, fontSize: 13 }}>{user.handle}</span>
+                {user.verified && <span style={{ color: MINT, fontSize: 10 }}>✦</span>}
+              </div>
+              <span style={{ fontSize: 12, color: GRAY }}>{m.text}</span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
+              <span style={{ fontSize: 11, color: GRAY }}>{m.time}</span>
+              {m.unread > 0 && (
+                <span style={{ background: MINT, color: "#000", borderRadius: 10, padding: "1px 7px", fontSize: 11, fontWeight: 700 }}>{m.unread}</span>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function ProfileScreen({ user }) {
+  const [tab, setTab] = useState("posts");
+  const userPosts = POSTS.filter(p => p.userId === user.id);
+
+  return (
+    <div style={{ flex: 1, overflowY: "auto", paddingBottom: 70 }}>
+      <div style={{ padding: "16px 16px 0", borderBottom: `1px solid #ffffff0a` }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 16 }}>
+          <span style={{ fontWeight: 700, fontSize: 15 }}>{user.handle}</span>
+          {user.verified && <span style={{ color: MINT }}>✦</span>}
+        </div>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 14 }}>
+          <div style={{ padding: 2, borderRadius: "50%", background: `linear-gradient(135deg, ${MINT}, #00bfff)` }}>
+            <div style={{ padding: 2, borderRadius: "50%", background: BG }}>
+              <Avatar user={user} size={72} />
+            </div>
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: "flex", justifyContent: "space-around", marginBottom: 10 }}>
+              {[["Posts", user.posts], ["Followers", user.followers], ["Following", user.following]].map(([k, v]) => (
+                <div key={k} style={{ textAlign: "center" }}>
+                  <div style={{ fontWeight: 800, fontSize: 16 }}>{v}</div>
+                  <div style={{ fontSize: 11, color: GRAY }}>{k}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <MintBtn small style={{ flex: 1 }}>Edit Profile</MintBtn>
+              <MintBtn small outline style={{ flex: 1 }}>Share</MintBtn>
+            </div>
+          </div>
+        </div>
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ fontWeight: 700, fontSize: 13 }}>{user.name}</div>
+          <div style={{ fontSize: 12, color: GRAY, whiteSpace: "pre-line", lineHeight: 1.5 }}>{user.bio}</div>
+        </div>
+
+        <div style={{ display: "flex", borderBottom: `1px solid #ffffff0a` }}>
+          {["posts", "vibes", "travel", "music"].map(t => (
+            <button key={t} onClick={() => setTab(t)} style={{
+              flex: 1, background: "none", border: "none", padding: "10px 0",
+              color: tab === t ? MINT : GRAY, borderBottom: tab === t ? `2px solid ${MINT}` : "2px solid transparent",
+              fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: 11, cursor: "pointer",
+              textTransform: "uppercase",
+            }}>{t}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 2, padding: 2 }}>
+        {(tab === "posts" ? userPosts : POSTS.slice(0, 3)).map(p => (
+          <div key={p.id} style={{
+            aspectRatio: "1", background: SURFACE, display: "flex",
+            alignItems: "center", justifyContent: "center", fontSize: 36,
+            position: "relative", cursor: "pointer",
+          }}>
+            {p.thumbnail}
+            {p.type === "video" && <span style={{ position: "absolute", top: 4, right: 4, color: MINT, fontSize: 12 }}>▶</span>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SectionLabel({ children }) {
+  return <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 8, color: LIGHT }}>{children}</div>;
+}
+
+// ── Bottom Nav ─────────────────────────────────────────────────────────────
+function BottomNav({ active, onChange }) {
+  const tabs = [
+    { id: "home", icon: "🏠", label: "Home" },
+    { id: "explore", icon: "🔍", label: "Explore" },
+    { id: "create", icon: "+", label: "Create", special: true },
+    { id: "inbox", icon: "💬", label: "Inbox" },
+    { id: "profile", icon: "👤", label: "Profile" },
+  ];
+  return (
+    <div style={{
+      position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)",
+      width: "100%", maxWidth: 430,
+      background: "#000000ee", borderTop: `1px solid #ffffff0a`,
+      display: "flex", justifyContent: "space-around", alignItems: "center",
+      padding: "8px 0 12px", zIndex: 100,
+      backdropFilter: "blur(12px)",
+    }}>
+      {tabs.map(t => (
+        <button key={t.id} onClick={() => onChange(t.id)} style={{
+          background: "none", border: "none", cursor: "pointer",
+          display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+          color: active === t.id ? MINT : GRAY,
+          fontFamily: "'Montserrat', sans-serif",
+        }}>
+          {t.special ? (
+            <div style={{
+              width: 44, height: 44, borderRadius: "50%",
+              background: MINT, color: "#000", fontSize: 24, fontWeight: 900,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              marginTop: -12, boxShadow: `0 0 18px ${MINT}66`,
+            }}>+</div>
+          ) : (
+            <>
+              <span style={{ fontSize: 20 }}>{t.icon}</span>
+              <span style={{ fontSize: 9, fontWeight: 600 }}>{t.label}</span>
+            </>
+          )}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ── App Shell ──────────────────────────────────────────────────────────────
+export default function App() {
+  const [tab, setTab] = useState("home");
+  const [profileUser, setProfileUser] = useState(USERS[0]);
+
+  const handleNav = (t) => {
+    if (t === "profile") setProfileUser(USERS[0]);
+    setTab(t);
+  };
+
+  return (
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        ::-webkit-scrollbar { width: 0; }
+        body { background: #000; }
+      `}</style>
+      <div style={styles.app}>
+        {tab === "home" && <HomeScreen onProfile={(u) => { setProfileUser(u); setTab("profile"); }} />}
+        {tab === "explore" && <ExploreScreen />}
+        {tab === "create" && <CreateScreen onClose={() => setTab("home")} />}
+        {tab === "notif" && <NotifScreen />}
+        {tab === "inbox" && <InboxScreen />}
+        {tab === "profile" && <ProfileScreen user={profileUser} />}
+
+        <BottomNav active={tab} onChange={handleNav} />
+      </div>
+    </>
+  );
+}
