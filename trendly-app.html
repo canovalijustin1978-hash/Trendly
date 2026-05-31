@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>TRENDLY — Where Your World Goes Viral</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --mint: #00F5C8;
+  --mint-dim: #00F5C815;
+  --mint-border: #00F5C830;
+  --black: #000000;
+  --surface: #0D0D0D;
+  --card: #111111;
+  --card2: #161616;
+  --gray: #666;
+  --gray2: #444;
+  --light: #F0F0F0;
+  --white: #ffffff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { background: var(--black); font-family: 'Montserrat', sans-serif; color: var(--light); overflow: hidden; height: 100vh; }
+::-webkit-scrollbar { width: 0; }
+
+/* ── APP SHELL ── */
+#app { width: 100%; max-width: 430px; height: 100vh; margin: 0 auto; display: flex; flex-direction: column; position: relative; overflow: hidden; background: var(--black); }
+
+/* ── SCREENS ── */
+.screen { flex: 1; overflow-y: auto; padding-bottom: 70px; display: none; flex-direction: column; }
+.screen.active { display: flex; }
+
+/* ── TOP BAR ── */
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 10px; position: sticky; top: 0; background: var(--black); z-index: 50; border-bottom: 1px solid #ffffff08; }
+.topbar-logo { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--mint); letter-spacing: 2px; }
+.topbar-icons { display: flex; gap: 16px; align-items: center; }
+.topbar-icon { font-size: 20px; cursor: pointer; }
+.topbar-tabs { display: flex; gap: 20px; }
+.topbar-tab { font-size: 13px; font-weight: 700; color: var(--gray); padding-bottom: 4px; cursor: pointer; border-bottom: 2px solid transparent; }
+.topbar-tab.active { color: var(--light); border-bottom-color: var(--mint); }
+
+/* ── BOTTOM NAV ── */
+#bottomnav { display: flex; justify-content: space-around; align-items: center; padding: 8px 0 16px; border-top: 1px solid #ffffff0a; background: #000000ee; backdrop-filter: blur(12px); position: sticky; bottom: 0; z-index: 100; flex-shrink: 0; }
+.nav-btn { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; background: none; border: none; color: var(--gray); font-family: 'Montserrat', sans-serif; }
+.nav-btn.active { color: var(--mint); }
+.nav-icon { font-size: 20px; }
+.nav-label { font-size: 9px; font-weight: 700; letter-spacing: 0.5px; }
+.nav-create { width: 46px; height: 46px; border-radius: 50%; background: var(--mint); display: flex; align-items: center; justify-content: center; color: #000; font-size: 26px; font-weight: 900; margin-top: -14px; box-shadow: 0 0 20px #00F5C866; cursor: pointer; border: none; }
+
+/* ── CARDS ── */
+.post-card { border-bottom: 1px solid #ffffff06; padding: 14px 16px; }
+.post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: var(--mint); flex-shrink: 0; border: 1.5px solid var(--mint-border); background: var(--mint-dim); }
+.post-user-info { flex: 1; }
+.post-username { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+.verified { color: var(--mint); font-size: 11px; }
+.post-time { font-size: 11px; color: var(--gray); }
+.follow-btn { background: transparent; border: 1.5px solid var(--mint); color: var(--mint); font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 20px; cursor: pointer; font-family: 'Montserrat', sans-serif; }
+.follow-btn.following { background: var(--mint); color: #000; }
+.post-media { background: var(--card); border-radius: 14px; height: 240px; display: flex; align-items: center; justify-content: center; font-size: 72px; position: relative; overflow: hidden; margin-bottom: 10px; border: 1px solid #ffffff06; }
+.post-badge { position: absolute; top: 10px; right: 10px; background: var(--mint); color: #000; font-size: 9px; font-weight: 800; padding: 3px 8px; border-radius: 10px; letter-spacing: 1px; }
+.post-views { position: absolute; bottom: 10px; left: 10px; background: #000000bb; color: var(--light); font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 10px; }
+.post-actions { display: flex; align-items: center; gap: 18px; margin-bottom: 8px; }
+.action-btn { background: none; border: none; display: flex; align-items: center; gap: 5px; color: var(--gray); font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Montserrat', sans-serif; }
+.action-btn.liked { color: var(--mint); }
+.action-btn .icon { font-size: 18px; }
+.post-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.tag { font-size: 11px; color: var(--mint); font-weight: 600; }
+
+/* ── STORIES ── */
+.stories { display: flex; gap: 12px; padding: 12px 16px; overflow-x: auto; }
+.story { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; flex-shrink: 0; }
+.story-ring { padding: 2px; border-radius: 50%; background: linear-gradient(135deg, var(--mint), #00bfff); }
+.story-ring-inner { padding: 2px; border-radius: 50%; background: var(--black); }
+.story-name { font-size: 10px; color: var(--gray); max-width: 54px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── EXPLORE ── */
+.search-bar { margin: 12px 16px; background: var(--card); border-radius: 24px; padding: 10px 16px; display: flex; align-items: center; gap: 10px; border: 1px solid #ffffff08; }
+.search-input { background: none; border: none; outline: none; color: var(--light); font-family: 'Montserrat', sans-serif; font-size: 13px; flex: 1; }
+.section-header { font-size: 13px; font-weight: 800; padding: 16px 16px 8px; letter-spacing: 0.5px; }
+.section-header span { color: var(--mint); }
+.trend-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #ffffff06; cursor: pointer; }
+.trend-tag { font-size: 14px; font-weight: 700; color: var(--mint); }
+.trend-count { font-size: 11px; color: var(--gray); }
+.trend-view { background: transparent; border: 1px solid var(--mint-border); color: var(--mint); font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 12px; cursor: pointer; font-family: 'Montserrat', sans-serif; }
+.suggest-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #ffffff06; }
+
+/* ── MESSAGES ── */
+.msg-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid #ffffff06; cursor: pointer; }
+.msg-info { flex: 1; }
+.msg-name { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 4px; margin-bottom: 3px; }
+.msg-preview { font-size: 12px; color: var(--gray); }
+.msg-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.msg-time { font-size: 11px; color: var(--gray); }
+.msg-badge { background: var(--mint); color: #000; font-size: 10px; font-weight: 800; padding: 1px 7px; border-radius: 10px; }
+
+/* ── PROFILE ── */
+.profile-header { padding: 16px; }
+.profile-top { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 14px; }
+.profile-avatar-wrap { padding: 2px; border-radius: 50%; background: linear-gradient(135deg, var(--mint), #00bfff); }
+.profile-avatar-inner { padding: 2px; border-radius: 50%; background: var(--black); }
+.profile-stats { flex: 1; display: flex; justify-content: space-around; }
+.stat { text-align: center; }
+.stat-num { font-size: 18px; font-weight: 800; }
+.stat-label { font-size: 10px; color: var(--gray); font-weight: 600; }
+.profile-name { font-size: 14px; font-weight: 800; margin-bottom: 4px; }
+.profile-bio { font-size: 12px; color: var(--gray); line-height: 1.6; white-space: pre-line; }
+.profile-btns { display: flex; gap: 8px; margin-top: 12px; }
+.profile-btn { flex: 1; padding: 8px; border-radius: 10px; font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; }
+.profile-btn-primary { background: var(--mint); color: #000; border: none; }
+.profile-btn-secondary { background: transparent; color: var(--light); border: 1.5px solid #ffffff22; }
+.profile-tabs { display: flex; border-bottom: 1px solid #ffffff0a; }
+.profile-tab { flex: 1; padding: 10px; text-align: center; font-size: 11px; font-weight: 700; color: var(--gray); cursor: pointer; border-bottom: 2px solid transparent; text-transform: uppercase; letter-spacing: 1px; }
+.profile-tab.active { color: var(--mint); border-bottom-color: var(--mint); }
+.grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px; padding: 2px; }
+.grid-item { aspect-ratio: 1; background: var(--card); display: flex; align-items: center; justify-content: center; font-size: 40px; position: relative; cursor: pointer; }
+.grid-play { position: absolute; top: 6px; right: 6px; color: var(--mint); font-size: 12px; }
+
+/* ── CREATE ── */
+.create-screen { padding: 20px 16px; display: flex; flex-direction: column; gap: 14px; }
+.create-option { background: var(--card); border-radius: 16px; padding: 22px; display: flex; align-items: center; gap: 16px; cursor: pointer; border: 1px solid var(--mint-border); transition: background 0.2s; }
+.create-option:active { background: var(--card2); }
+.create-icon { font-size: 40px; }
+.create-text-title { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+.create-text-sub { font-size: 12px; color: var(--gray); }
+
+/* ── WELCOME / AUTH ── */
+.auth-screen { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 40px 28px; background: var(--black); position: fixed; inset: 0; z-index: 200; }
+.auth-screen.active { display: flex; }
+.auth-logo { font-family: 'Bebas Neue', sans-serif; font-size: 64px; color: var(--mint); letter-spacing: 4px; text-shadow: 0 0 40px #00F5C855; margin-bottom: 8px; }
+.auth-tagline { font-size: 13px; color: var(--gray); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 50px; }
+.auth-logo-circle { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--mint); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; box-shadow: 0 0 30px #00F5C844; }
+.auth-t { font-family: 'Bebas Neue', sans-serif; font-size: 64px; color: var(--mint); }
+.auth-btn { width: 100%; padding: 16px; border-radius: 30px; font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 800; cursor: pointer; margin-bottom: 12px; letter-spacing: 0.5px; border: none; }
+.auth-btn-primary { background: var(--mint); color: #000; box-shadow: 0 0 20px #00F5C855; }
+.auth-btn-secondary { background: transparent; color: var(--mint); border: 2px solid var(--mint); }
+.auth-link { font-size: 12px; color: var(--gray); margin-top: 8px; cursor: pointer; }
+.auth-link span { color: var(--mint); }
+.auth-form { width: 100%; display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
+.auth-input { background: var(--card); border: 1px solid #ffffff12; border-radius: 14px; padding: 14px 16px; color: var(--light); font-family: 'Montserrat', sans-serif; font-size: 14px; outline: none; }
+.auth-input:focus { border-color: var(--mint-border); }
+.auth-input::placeholder { color: var(--gray); }
+.auth-title { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--light); margin-bottom: 8px; letter-spacing: 2px; }
+.auth-sub { font-size: 13px; color: var(--gray); margin-bottom: 30px; }
+.auth-back { align-self: flex-start; background: none; border: none; color: var(--gray); font-size: 24px; cursor: pointer; margin-bottom: 20px; }
+
+/* ── TRENDLY+ BADGE ── */
+.plus-badge { background: var(--mint); color: #000; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 8px; }
+
+/* ── NOTIFICATIONS DOT ── */
+.notif-dot { width: 8px; height: 8px; background: var(--mint); border-radius: 50%; position: absolute; top: 0; right: 0; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.post-card { animation: fadeIn 0.3s ease; }
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREENS -->
+<div class="auth-screen active" id="welcomeScreen">
+  <div class="auth-logo-circle"><div class="auth-t">T</div></div>
+  <div class="auth-logo">TRENDLY</div>
+  <div class="auth-tagline">Create · Share · Trend</div>
+  <button class="auth-btn auth-btn-primary" onclick="showScreen('signupScreen')">GET STARTED →</button>
+  <button class="auth-btn auth-btn-secondary" onclick="showScreen('loginScreen')">SIGN IN →</button>
+  <div class="auth-link" onclick="showScreen('signupScreen')">New here? <span>Create an account</span></div>
+</div>
+
+<div class="auth-screen" id="signupScreen">
+  <button class="auth-back" onclick="showScreen('welcomeScreen')">←</button>
+  <div class="auth-title">JOIN TRENDLY</div>
+  <div class="auth-sub">Create your account and start trending</div>
+  <div class="auth-form">
+    <input class="auth-input" id="signup-name" placeholder="Full Name" type="text"/>
+    <input class="auth-input" id="signup-username" placeholder="Username (e.g. @yourname)" type="text"/>
+    <input class="auth-input" id="signup-email" placeholder="Email Address" type="email"/>
+    <input class="auth-input" id="signup-password" placeholder="Password" type="password"/>
+  </div>
+  <button class="auth-btn auth-btn-primary" onclick="handleSignup()">CREATE ACCOUNT →</button>
+  <div class="auth-link" onclick="showScreen('loginScreen')">Already have an account? <span>Sign In</span></div>
+</div>
+
+<div class="auth-screen" id="loginScreen">
+  <button class="auth-back" onclick="showScreen('welcomeScreen')">←</button>
+  <div class="auth-title">WELCOME BACK</div>
+  <div class="auth-sub">Sign in to your Trendly account</div>
+  <div class="auth-form">
+    <input class="auth-input" id="login-email" placeholder="Email Address" type="email"/>
+    <input class="auth-input" id="login-password" placeholder="Password" type="password"/>
+  </div>
+  <button class="auth-btn auth-btn-primary" onclick="handleLogin()">SIGN IN →</button>
+  <div class="auth-link" onclick="showScreen('signupScreen')">Don't have an account? <span>Sign Up</span></div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none">
+
+  <!-- HOME SCREEN -->
+  <div class="screen active" id="homeScreen">
+    <div class="topbar">
+      <div class="topbar-logo">TRENDLY</div>
+      <div class="topbar-tabs">
+        <div class="topbar-tab active">For You</div>
+        <div class="topbar-tab">Following</div>
+      </div>
+      <div class="topbar-icons">
+        <span class="topbar-icon">🔍</span>
+        <span class="topbar-icon" style="position:relative">🔔<div class="notif-dot"></div></span>
+      </div>
+    </div>
+
+    <!-- Stories -->
+    <div class="stories" id="storiesRow"></div>
+
+    <!-- Feed -->
+    <div id="feedPosts"></div>
+  </div>
+
+  <!-- EXPLORE SCREEN -->
+  <div class="screen" id="exploreScreen">
+    <div class="topbar">
+      <div class="topbar-logo">TRENDZONE</div>
+    </div>
+    <div class="search-bar">
+      <span>🔍</span>
+      <input class="search-input" placeholder="Search tags, people, vibes…" id="searchInput" oninput="handleSearch(this.value)"/>
+    </div>
+    <div class="section-header">🔥 <span>Trending Now</span></div>
+    <div id="trendingList"></div>
+    <div class="section-header">👥 <span>Suggested For You</span></div>
+    <div id="suggestedList"></div>
+  </div>
+
+  <!-- CREATE SCREEN -->
+  <div class="screen" id="createScreen">
+    <div class="topbar">
+      <div class="topbar-logo">CREATE</div>
+    </div>
+    <div class="create-screen">
+      <div class="create-option" onclick="alert('Video upload coming soon! 🎥')">
+        <span class="create-icon">📹</span>
+        <div>
+          <div class="create-text-title">Upload Video</div>
+          <div class="create-text-sub">Share your moments with the world</div>
+        </div>
+      </div>
+      <div class="create-option" onclick="alert('Photo upload coming soon! 📸')">
+        <span class="create-icon">📸</span>
+        <div>
+          <div class="create-text-title">Upload Photo</div>
+          <div class="create-text-sub">Express your style and creativity</div>
+        </div>
+      </div>
+      <div class="create-option" onclick="alert('Go Live coming soon! 📡')">
+        <span class="create-icon">📡</span>
+        <div>
+          <div class="create-text-title">Go Live</div>
+          <div class="create-text-sub">Stream to your followers in real time</div>
+        </div>
+      </div>
+      <div class="create-option" onclick="showBoost()">
+        <span class="create-icon">⚡</span>
+        <div>
+          <div class="create-text-title">Trend Boost — $1.99</div>
+          <div class="create-text-sub">Push your post to TrendZone and reach millions</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MESSAGES SCREEN -->
+  <div class="screen" id="messagesScreen">
+    <div class="topbar">
+      <div class="topbar-logo">INBOX</div>
+      <div class="topbar-icons"><span class="topbar-icon" style="color:var(--mint)">✏️</span></div>
+    </div>
+    <div id="messagesList"></div>
+  </div>
+
+  <!-- PROFILE SCREEN -->
+  <div class="screen" id="profileScreen">
+    <div class="topbar">
+      <div id="profileUsername" class="topbar-logo" style="font-size:16px;color:var(--light)">@username</div>
+      <div class="topbar-icons"><span class="topbar-icon">⚙️</span></div>
+    </div>
+    <div class="profile-header">
+      <div class="profile-top">
+        <div class="profile-avatar-wrap">
+          <div class="profile-avatar-inner">
+            <div class="avatar" style="width:72px;height:72px;font-size:24px" id="profileAvatar">JB</div>
+          </div>
+        </div>
+        <div class="profile-stats">
+          <div class="stat"><div class="stat-num" id="profilePosts">0</div><div class="stat-label">Posts</div></div>
+          <div class="stat"><div class="stat-num">0</div><div class="stat-label">Followers</div></div>
+          <div class="stat"><div class="stat-num">0</div><div class="stat-label">Following</div></div>
+        </div>
+      </div>
+      <div class="profile-name" id="profileName">Your Name</div>
+      <div class="profile-bio" id="profileBio">Welcome to Trendly! ✨ #CreateShareTrend</div>
+      <div class="profile-btns">
+        <button class="profile-btn profile-btn-primary" onclick="alert('Edit profile coming soon!')">Edit Profile</button>
+        <button class="profile-btn profile-btn-secondary" onclick="shareProfile()">Share Profile</button>
+      </div>
+    </div>
+    <div class="profile-tabs">
+      <div class="profile-tab active" onclick="switchTab(this,'posts')">Posts</div>
+      <div class="profile-tab" onclick="switchTab(this,'vibes')">Vibes</div>
+      <div class="profile-tab" onclick="switchTab(this,'travel')">Travel</div>
+      <div class="profile-tab" onclick="switchTab(this,'music')">Music</div>
+    </div>
+    <div class="grid" id="profileGrid"></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div id="bottomnav">
+    <button class="nav-btn active" onclick="switchNav('home',this)">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Home</span>
+    </button>
+    <button class="nav-btn" onclick="switchNav('explore',this)">
+      <span class="nav-icon">🔍</span>
+      <span class="nav-label">Explore</span>
+    </button>
+    <button class="nav-create" onclick="switchNav('create',this)">+</button>
+    <button class="nav-btn" onclick="switchNav('messages',this)">
+      <span class="nav-icon">💬</span>
+      <span class="nav-label">Messages</span>
+    </button>
+    <button class="nav-btn" onclick="switchNav('profile',this)">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">Profile</span>
+    </button>
+  </div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────
+const USERS = [
+  { id:1, handle:"jay.breezy", name:"Jay Breezy", verified:true, avatar:"JB", posts:128, followers:"24.6K", following:178, bio:"Artist | Creator | Dreamer\nNYC – Living my best life 🔥\n#CreateShareTrend" },
+  { id:2, handle:"_its.luxx", name:"Lux", verified:true, avatar:"LX", posts:312, followers:"18.3K", following:94, bio:"Dreamer | Creator | Visionary\n#CreateShareTrend" },
+  { id:3, handle:"sarah.k", name:"Sarah K", verified:false, avatar:"SK", posts:54, followers:"2.1K", following:320, bio:"Lifestyle & Travel 🌍" },
+  { id:4, handle:"mike.beats", name:"Mike Beats", verified:false, avatar:"MB", posts:87, followers:"5.4K", following:210, bio:"Music producer 🎵 NYC" },
+  { id:5, handle:"neon.dreams", name:"Neon Dreams", verified:true, avatar:"ND", posts:201, followers:"31K", following:55, bio:"Night photographer 📸" },
+];
+
+const POSTS = [
+  { id:1, userId:1, type:"video", label:"Summer Vibes", views:"12.5K", likes:1300, comments:89, shares:45, tags:["#summervibes","#nyc"], time:"2h", emoji:"🌅" },
+  { id:2, userId:2, type:"photo", label:"City Lights", views:"9.6K", likes:980, comments:56, shares:22, tags:["#citylights","#streetwear"], time:"4h", emoji:"🌃" },
+  { id:3, userId:3, type:"video", label:"Morning Routine", views:"4.2K", likes:430, comments:31, shares:10, tags:["#lifestyle","#morning"], time:"6h", emoji:"☀️" },
+  { id:4, userId:4, type:"video", label:"Studio Session", views:"7.8K", likes:860, comments:74, shares:33, tags:["#music","#producer"], time:"1d", emoji:"🎧" },
+  { id:5, userId:5, type:"photo", label:"Neon Nights", views:"15K", likes:2100, comments:142, shares:88, tags:["#neon","#nightlife"], time:"1d", emoji:"🌆" },
+];
+
+const TRENDING = [
+  { tag:"#SummerVibes", posts:"12.5K" },
+  { tag:"#NightLife", posts:"8.9K" },
+  { tag:"#StreetWear", posts:"6.2K" },
+  { tag:"#TechTalk", posts:"4.7K" },
+  { tag:"#FoodVibes", posts:"3.8K" },
+  { tag:"#TravelGoals", posts:"3.1K" },
+  { tag:"#MusicVibes", posts:"2.9K" },
+];
+
+const MESSAGES = [
+  { userId:2, text:"Your post was 🔥🔥 bro!", time:"2m", unread:2 },
+  { userId:3, text:"That sunset shot is everything 😍", time:"15m", unread:0 },
+  { userId:4, text:"Bro drop that track already!", time:"1h", unread:1 },
+  { userId:5, text:"Collab? DM me 📸", time:"3h", unread:0 },
+];
+
+// ── STATE ────────────────────────────────────────────────────────────────
+let currentUser = null;
+let likedPosts = {};
+let followingUsers = {};
+
+// ── AUTH ─────────────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.auth-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function handleSignup() {
+  const name = document.getElementById('signup-name').value.trim();
+  const username = document.getElementById('signup-username').value.trim();
+  const email = document.getElementById('signup-email').value.trim();
+  if (!name || !username || !email) { alert('Please fill in all fields!'); return; }
+  currentUser = { name, handle: username.replace('@',''), email, avatar: name.substring(0,2).toUpperCase() };
+  launchApp();
+}
+
+function handleLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  if (!email) { alert('Please enter your email!'); return; }
+  currentUser = { name: "Jay Breezy", handle: "jay.breezy", email, avatar: "JB" };
+  launchApp();
+}
+
+function launchApp() {
+  document.querySelectorAll('.auth-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('app').style.display = 'flex';
+  renderAll();
+}
+
+// ── RENDER ───────────────────────────────────────────────────────────────
+function renderAll() {
+  renderStories();
+  renderFeed();
+  renderTrending();
+  renderSuggested();
+  renderMessages();
+  renderProfile();
+  renderGrid();
+}
+
+function renderStories() {
+  const el = document.getElementById('storiesRow');
+  el.innerHTML = USERS.map(u => `
+    <div class="story" onclick="alert('${u.handle}\\'s story 🔥')">
+      <div class="story-ring"><div class="story-ring-inner">
+        <div class="avatar" style="width:48px;height:48px;font-size:14px">${u.avatar}</div>
+      </div></div>
+      <div class="story-name">${u.handle}</div>
+    </div>
+  `).join('');
+}
+
+function renderFeed() {
+  const el = document.getElementById('feedPosts');
+  el.innerHTML = POSTS.map(p => {
+    const user = USERS.find(u => u.id === p.userId);
+    const liked = likedPosts[p.id];
+    const following = followingUsers[user.id];
+    return `
+    <div class="post-card" id="post-${p.id}">
+      <div class="post-header">
+        <div class="avatar" style="width:38px;height:38px;font-size:12px">${user.avatar}</div>
+        <div class="post-user-info">
+          <div class="post-username">${user.handle} ${user.verified ? '<span class="verified">✦</span>' : ''}</div>
+          <div class="post-time">${p.time} ago</div>
+        </div>
+        <button class="follow-btn ${following?'following':''}" onclick="toggleFollow(${user.id},this)">${following?'Following':'Follow'}</button>
+      </div>
+      <div class="post-media">
+        <span>${p.emoji}</span>
+        <div class="post-badge">${p.type === 'video' ? '📹 VIDEO' : '📸 PHOTO'}</div>
+        ${p.type === 'video' ? `<div class="post-views">▶ ${p.views} views</div>` : ''}
+      </div>
+      <div class="post-actions">
+        <button class="action-btn ${liked?'liked':''}" onclick="toggleLike(${p.id},this)">
+          <span class="icon">${liked?'❤️':'🤍'}</span>
+          <span id="likes-${p.id}">${liked ? p.likes+1 : p.likes}</span>
+        </button>
+        <button class="action-btn" onclick="alert('Comments coming soon! 💬')">
+          <span class="icon">💬</span><span>${p.comments}</span>
+        </button>
+        <button class="action-btn" onclick="sharePost(${p.id})">
+          <span class="icon">↗️</span><span>${p.shares}</span>
+        </button>
+        <button class="action-btn" style="margin-left:auto" onclick="alert('Saved! 🔖')">
+          <span class="icon">🔖</span>
+        </button>
+      </div>
+      <div class="post-tags">${p.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderTrending() {
+  document.getElementById('trendingList').innerHTML = TRENDING.map(t => `
+    <div class="trend-item">
+      <div>
+        <div class="trend-tag">${t.tag}</div>
+        <div class="trend-count">${t.posts} posts</div>
+      </div>
+      <button class="trend-view" onclick="alert('${t.tag} — ${t.posts} posts 🔥')">View</button>
+    </div>
+  `).join('');
+}
+
+function renderSuggested() {
+  document.getElementById('suggestedList').innerHTML = USERS.slice(1,4).map(u => `
+    <div class="suggest-item">
+      <div class="avatar" style="width:42px;height:42px;font-size:13px">${u.avatar}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;display:flex;align-items:center;gap:4px">${u.handle}${u.verified?'<span class="verified">✦</span>':''}</div>
+        <div style="font-size:11px;color:var(--gray)">${u.followers} followers</div>
+      </div>
+      <button class="follow-btn ${followingUsers[u.id]?'following':''}" onclick="toggleFollow(${u.id},this)">${followingUsers[u.id]?'Following':'Follow'}</button>
+    </div>
+  `).join('');
+}
+
+function renderMessages() {
+  document.getElementById('messagesList').innerHTML = MESSAGES.map(m => {
+    const user = USERS.find(u => u.id === m.userId);
+    return `
+    <div class="msg-item" onclick="openMessage('${user.handle}')">
+      <div class="avatar" style="width:46px;height:46px;font-size:14px">${user.avatar}</div>
+      <div class="msg-info">
+        <div class="msg-name">${user.handle}${user.verified?'<span class="verified">✦</span>':''}</div>
+        <div class="msg-preview">${m.text}</div>
+      </div>
+      <div class="msg-meta">
+        <div class="msg-time">${m.time}</div>
+        ${m.unread > 0 ? `<div class="msg-badge">${m.unread}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderProfile() {
+  if (!currentUser) return;
+  document.getElementById('profileUsername').textContent = '@' + currentUser.handle;
+  document.getElementById('profileName').textContent = currentUser.name;
+  document.getElementById('profileAvatar').textContent = currentUser.avatar;
+}
+
+function renderGrid() {
+  const emojis = ['🌅','🌃','☀️','🎧','🌆','🏙️','🎵','🌊','🏔️'];
+  document.getElementById('profileGrid').innerHTML = emojis.map((e,i) => `
+    <div class="grid-item" onclick="alert('Post ${i+1} 🔥')">
+      ${e}
+      ${i%3===0 ? '<span class="grid-play">▶</span>' : ''}
+    </div>
+  `).join('');
+}
+
+// ── INTERACTIONS ─────────────────────────────────────────────────────────
+function toggleLike(postId, btn) {
+  likedPosts[postId] = !likedPosts[postId];
+  const post = POSTS.find(p => p.id === postId);
+  const liked = likedPosts[postId];
+  btn.classList.toggle('liked', liked);
+  btn.querySelector('.icon').textContent = liked ? '❤️' : '🤍';
+  document.getElementById('likes-'+postId).textContent = liked ? post.likes+1 : post.likes;
+}
+
+function toggleFollow(userId, btn) {
+  followingUsers[userId] = !followingUsers[userId];
+  btn.textContent = followingUsers[userId] ? 'Following' : 'Follow';
+  btn.classList.toggle('following', followingUsers[userId]);
+}
+
+function openMessage(handle) {
+  alert('Chat with @'+handle+' coming soon! 💬');
+}
+
+function sharePost(id) {
+  if (navigator.share) {
+    navigator.share({ title: 'Check out this post on Trendly!', url: window.location.href });
+  } else {
+    alert('Share link copied! 🔥');
+  }
+}
+
+function shareProfile() {
+  if (navigator.share) {
+    navigator.share({ title: 'Check out my Trendly profile!', url: window.location.href });
+  } else {
+    alert('Profile link copied! 🔥');
+  }
+}
+
+function showBoost() {
+  alert('Trend Boost — $1.99\nBoost your post to TrendZone and reach millions!\n\nPayment system coming soon! ⚡');
+}
+
+function handleSearch(val) {
+  if (!val) { renderTrending(); return; }
+  const filtered = TRENDING.filter(t => t.tag.toLowerCase().includes(val.toLowerCase()));
+  document.getElementById('trendingList').innerHTML = filtered.length ? filtered.map(t => `
+    <div class="trend-item">
+      <div><div class="trend-tag">${t.tag}</div><div class="trend-count">${t.posts} posts</div></div>
+      <button class="trend-view" onclick="alert('${t.tag} 🔥')">View</button>
+    </div>
+  `).join('') : '<div style="padding:20px 16px;color:var(--gray);text-align:center">No results found</div>';
+}
+
+function switchTab(el, tab) {
+  document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ── NAVIGATION ───────────────────────────────────────────────────────────
+function switchNav(screen, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screen+'Screen').classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  if (btn && btn.classList.contains('nav-btn')) btn.classList.add('active');
+}
+</script>
+</body>
+</html>
